@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../Models/constants.dart';
 import '../Models/question_model.dart';
+import '../widgets/question_widget.dart';
+import '../widgets/next_buttor.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -43,6 +45,21 @@ class HomeScreenState extends State<HomeScreen> {
   // Add more questions in the same format here...
 ];
 int index =0;
+  void nextQuestion(){
+    setState(() {
+
+      if (index == _questions.length -1){
+        return;
+      }
+      else{
+         setState(() {
+        index ++;
+         });
+      }
+     
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -53,6 +70,22 @@ int index =0;
         backgroundColor: backgroundOne,
         shadowColor: Colors.transparent,
       ),
+      body:Container (
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Column(children: [
+          QuestionWidget(question: _questions[index].title, indexAction: index, totalQuestions: _questions.length,),
+          const Divider(
+            color: neutral,
+          )
+
+        ]),
+      
+      ),
+      floatingActionButton:NextButton(
+        nextQuestion: nextQuestion,
+      ) ,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
