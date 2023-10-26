@@ -3,89 +3,150 @@ import '../Models/constants.dart';
 import '../Models/question_model.dart';
 import '../widgets/question_widget.dart';
 import '../widgets/next_buttor.dart';
+import '../widgets/options_card.dart';
+import '../widgets/result_box.dart';
+import '../widgets/questions.dart'; // Import the quiz data
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  State<HomeScreen> createState() => HomeScreenState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class HomeScreenState extends State<HomeScreen> {
-  List<Question> _questions =[
-  Question(
-    id: '1',
-    title: 'What is Dart?',
-    options: {
-      'A programming language': true,
-      'A type of dessert': false,
-      'A type of bird': false,
-      'A fruit': false,
-    },
-  ),
-  Question(
-    id: '2',
-    title: 'What is Flutter?',
-    options: {
-      'A mobile app development framework': true,
-      'A cooking technique': false,
-      'A type of dance': false,
-      'A sport': false,
-    },
-  ),
-  Question(
-    id: '3',
-    title: 'What is a Widget in Flutter?',
-    options: {
-      'A UI component': true,
-      'A type of food': false,
-      'A type of vehicle': false,
-      'A type of animal': false,
-    },
-  ),
-  // Add more questions in the same format here...
-];
-int index =0;
-  void nextQuestion(){
-    setState(() {
+class _HomeScreenState extends State<HomeScreen> {
+  int index = 0;
+  int score = 0;
 
-      if (index == _questions.length -1){
-        return;
+  List<Map<String, dynamic>> questions = QuizData.questions;
+
+  bool isPressed = false;
+  bool isAlreadySelected = false;
+
+  void nextQuestion(int questionLength) {
+    if (index == questionLength - 1) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => ResultBox(
+          result: score,
+          questionLength: questionLength,
+          onPressed: startOver,
+        ),
+      );
+    } else {
+      if (isPressed) {
+        setState(() {
+          index++;
+          isPressed = false;
+          isAlreadySelected = false;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Please select any option'),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.symmetric(vertical: 20.0),
+        ));
       }
-      else{
-         setState(() {
-        index ++;
-         });
+    }
+  }
+
+  void checkAnswerAndUpdate(String selectedOption) {
+    if (isAlreadySelected) {
+      return;
+    } else {
+      if (selectedOption == questions[index]['correctOption']) {
+        score++;
       }
-     
+      setState(() {
+        isPressed = true;
+        isAlreadySelected = true;
+      });
+    }
+  }
+
+  void startOver() {
+    setState(() {
+      index = 0;
+      score = 0;
+      isPressed = false;
+      isAlreadySelected = false;
     });
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: backgroundOne,
       appBar: AppBar(
-        title: Text('Quiz App'),
+        title: const Text('Quiz App'),
         backgroundColor: backgroundOne,
         shadowColor: Colors.transparent,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(18.0),
+            child: Text(
+              'Score: $score',
+              style: const TextStyle(fontSize: 18.0),
+            ),
+          ),
+        ],
+        leading: IconButton(
+          icon: Icon(Icons.menu),
+          onPressed: () {
+            Scaffold.of(context).openDrawer();
+          },
+        ),
       ),
-      body:Container (
+      body: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Column(children: [
-          QuestionWidget(question: _questions[index].title, indexAction: index, totalQuestions: _questions.length,),
-          const Divider(
-            color: neutral,
-          )
-
-        ]),
-      
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        child: Column(
+          children: [
+            QuestionWidget(
+              indexAction: index,
+              question: questions[index]['title'],
+              totalQuestions: questions.length,
+            ),
+            const Divider(color: neutral),
+            const SizedBox(height: 25.0),
+            for (var option in questions[index]['options'].keys)
+              GestureDetector(
+                onTap: () => checkAnswerAndUpdate(option),
+                child: OptionCard(
+                  option: option,
+                  color: isPressed
+                      ? option == questions[index]['correctOption']
+                          ? correct
+                          : incorrect
+                      : neutral,
+                ),
+              ),
+          ],
+        ),
       ),
-      floatingActionButton:NextButton(
-        nextQuestion: nextQuestion,
-      ) ,
+      floatingActionButton: GestureDetector(
+        onTap: () => nextQuestion(questions.length),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10.0),
+          child: NextButton(),
+        ),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            ListTile(
+              title: Text('Landing Screen'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.pushReplacementNamed(context, '/');
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

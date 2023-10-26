@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 import './screens/homescreen.dart';
-void main(){
-  runApp(
-    const MyApp(),
-  );
+import './screens/landingScreen.dart';
+
+void main() {
+ 
+  runApp(MyApp());
+
 }
+
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-
-      home: HomeScreen(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => LandingScreen(),
+        '/home': (context) => HomeScreen(),
+      },
     );
   }
 }

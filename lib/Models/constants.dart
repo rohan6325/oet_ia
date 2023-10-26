@@ -6,3 +6,4 @@ const Color neutral = Color.fromARGB(255, 184, 183, 183);
 const Color backgroundOne = Color.fromARGB(255, 4, 7, 73);
 const Color TextColor = Color.fromARGB(255, 28, 2, 121);
 const Color backgroundTwo =Color.fromARGB(255, 28, 2, 121);
+const Color selected = Color.fromARGB(255, 249, 223, 203);
